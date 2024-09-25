@@ -7,6 +7,7 @@ python -u run.py \
   --data_path electricity.csv \
   --model_id ECL_96_96 \
   --model $model_name \
+  --channel_independence 0 \
   --data custom \
   --features M \
   --seq_len 96 \
@@ -28,6 +29,7 @@ python -u run.py \
   --data_path electricity.csv \
   --model_id ECL_96_192 \
   --model $model_name \
+  --channel_independence 0 \
   --data custom \
   --features M \
   --seq_len 96 \
@@ -49,6 +51,7 @@ python -u run.py \
   --data_path electricity.csv \
   --model_id ECL_96_336 \
   --model $model_name \
+  --channel_independence 0 \
   --data custom \
   --features M \
   --seq_len 96 \
@@ -70,6 +73,7 @@ python -u run.py \
   --data_path electricity.csv \
   --model_id ECL_96_720 \
   --model $model_name \
+  --channel_independence 0 \
   --data custom \
   --features M \
   --seq_len 96 \

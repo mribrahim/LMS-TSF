@@ -8,6 +8,7 @@ python -u run.py \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_96 \
   --model $model_name \
+  --channel_independence 0 \
   --data ETTh1 \
   --features M \
   --seq_len 96 \
@@ -29,6 +30,7 @@ python -u run.py \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_192 \
   --model $model_name \
+  --channel_independence 0 \
   --data ETTh1 \
   --features M \
   --seq_len 96 \
@@ -50,6 +52,7 @@ python -u run.py \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_336 \
   --model $model_name \
+  --channel_independence 0 \
   --data ETTh1 \
   --features M \
   --seq_len 96 \
@@ -71,6 +74,7 @@ python -u run.py \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_720 \
   --model $model_name \
+  --channel_independence 0 \
   --data ETTh1 \
   --features M \
   --seq_len 96 \

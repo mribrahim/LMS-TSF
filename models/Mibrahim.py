@@ -6,16 +6,40 @@ import torch.nn.functional as F
 
 from layers.StandardNorm import Normalize
 
+
+def compute_lagged_difference(x, lag=1):
+    lagged_x = torch.roll(x, shifts=lag, dims=1)
+    diff_x = x - lagged_x
+    diff_x[:, :lag, :] = x[:, :lag, :]
+    return diff_x
+
+class Autocorrelation(nn.Module):
+    def __init__(self, feature_dim, seq_len, pred_len, max_lag=10):
+        super(Autocorrelation, self).__init__()
+        self.max_lag = max_lag
+        self.feature_dim = feature_dim
+        self.seq_len = seq_len
+        self.pred_len = pred_len
+
+        self.forecasting_layer = nn.Linear(self.seq_len, self.pred_len)        
+
+    def forward(self, x):
+        autocorr_features = compute_lagged_difference(x)
+        autocorr_forecast = self.forecasting_layer(autocorr_features.permute(0, 2, 1))  # (B, F, pred_len)
+
+        return autocorr_forecast.permute(0,2,1)
+
+
 class Encoder(nn.Module):
     def __init__(self, configs, seq_len, pred_len):
         super(Encoder, self).__init__()
         self.seq_len = seq_len
         self.pred_len = pred_len
         self.feature_dim = configs.enc_in
-        self.channel_independence = 0 #configs.channel_independence
+        self.channel_independence = configs.channel_independence
 
         self.linear_final = nn.Linear(self.seq_len, self.pred_len)
-        
+
         self.temporal = nn.Sequential(
             nn.Linear(self.seq_len, configs.d_model),
             nn.ReLU(),
@@ -23,18 +47,17 @@ class Encoder(nn.Module):
             nn.Dropout(configs.dropout)
         )
 
-
-        if not self.channel_independence:        
+        if not self.channel_independence:
             self.channel = nn.Sequential(
                 nn.Linear(self.feature_dim, configs.d_model),
                 nn.ReLU(),
                 nn.Linear(configs.d_model, self.feature_dim),
                 nn.Dropout(configs.dropout)
             )
-            
+
 
     def forward(self, x_enc):
-        
+
         # Temporal and channel processing
         x_temp = self.temporal(x_enc.permute(0, 2, 1)).permute(0, 2, 1)
         x = x_enc + x_temp
@@ -58,7 +81,6 @@ class Model(nn.Module):
         self.d_model = configs.d_model
         self.down_sampling_layers = 3
         self.down_sampling_window = 2
-        
 
         sequence_list = [1]
         current = 2
@@ -66,20 +88,19 @@ class Model(nn.Module):
             sequence_list.append(current)
             current *= 2
                 
-        print("sequence_list: ", sequence_list)        
-                
+        num_scales = len(sequence_list)        
+        
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.cutoff_frequencies = nn.Parameter(torch.ones(len(sequence_list), device=self.device) * torch.tensor(0.2)) 
-        self.stepness = nn.Parameter(torch.ones(len(sequence_list), device=self.device) * torch.tensor(10))  
+        self.cutoff_frequencies = nn.Parameter(torch.ones(num_scales, self.feature_dim, device=self.device) * torch.tensor(0.2))
+        self.stepness = nn.Parameter(torch.ones(num_scales, self.feature_dim, device=self.device) * torch.tensor(10))
 
-
-        # ******************* SCALED INPUTS *******************************
         self.encoder_Seasonal = torch.nn.ModuleList([Encoder(configs, self.seq_len//i, self.pred_len) for i in sequence_list])
         self.encoder_Trend = torch.nn.ModuleList([Encoder(configs, self.seq_len//i, self.pred_len) for i in sequence_list])
+        self.autocorr = torch.nn.ModuleList([Autocorrelation(self.feature_dim, self.seq_len//i, self.pred_len) for i in sequence_list])
 
         self.normalize_layer = Normalize(configs.enc_in, affine=True, non_norm=True if configs.use_norm == 0 else False)
-        self.projection = nn.Linear(self.pred_len * len(sequence_list), self.pred_len)   
+        self.projection = nn.Linear(self.pred_len * num_scales, self.pred_len)   
 
     
     def __multi_scale_process_inputs(self, x_enc, x_mark_enc):
@@ -112,26 +133,17 @@ class Model(nn.Module):
         return x_enc, x_mark_enc
 
 
-    
     def low_pass_filter(self, x_freq, seq_len, cutoff_frequency, stepness):
-        """
-        Apply a differentiable low-pass filter using a sigmoid-based mask.
-        """
         freqs = torch.fft.fftfreq(seq_len, d=1.0).to(x_freq.device)
-        # Sigmoid to create a soft mask for low-pass filtering: pass low frequencies
-        mask = torch.sigmoid(-(freqs - cutoff_frequency) * stepness)  # '10' controls the stepness of the transition
-        mask = mask.view(1, -1, 1).to(x_freq.device)
+        mask = torch.sigmoid(-(freqs.unsqueeze(-1) - cutoff_frequency) * stepness)  # Apply different cutoff for each feature
+        mask = mask.to(x_freq.device)
         x_freq_filtered = x_freq * mask
         return x_freq_filtered
 
     def high_pass_filter(self, x_freq, seq_len, cutoff_frequency, stepness):
-        """
-        Apply a differentiable high-pass filter using a sigmoid-based mask.
-        """
         freqs = torch.fft.fftfreq(seq_len, d=1.0).to(x_freq.device)
-        # Sigmoid to create a soft mask for high-pass filtering: pass high frequencies
-        mask = torch.sigmoid((freqs - cutoff_frequency) * stepness)  # '10' controls the stepness of the transition
-        mask = mask.view(1, -1, 1).to(x_freq.device)
+        mask = torch.sigmoid((freqs.unsqueeze(-1) - cutoff_frequency) * stepness)  # Apply different cutoff for each feature
+        mask = mask.to(x_freq.device)
         x_freq_filtered = x_freq * mask
         return x_freq_filtered
     
@@ -139,44 +151,32 @@ class Model(nn.Module):
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
                 
         x_enc = self.normalize_layer(x_enc, 'norm')
-        # x_enc = self.enc_embedding(x_enc, x_mark_enc)
-             
+
         output_list = []
-        # input_list = []
         # ******************* SCALED INPUTS *******************************
         x_enc_list, x_mark_enc_list = self.__multi_scale_process_inputs(x_enc, x_mark_enc)
         for i, x in zip(range(len(x_enc_list)), x_enc_list):
-            # print(x.shape)
-
-
-            # input_list.append(self.adjust(x))
             seq_len = x.shape[1]
             # Frequency domain processing
             x_freq = torch.fft.fft(x, dim=1)
 
             x_freq_low = self.low_pass_filter(x_freq, seq_len, self.cutoff_frequencies[i], self.stepness[i])
             x_freq_high = self.high_pass_filter(x_freq, seq_len, self.cutoff_frequencies[i], self.stepness[i])
-
+        
             x_low = torch.fft.ifft(x_freq_low, dim=1).real
             x_high = torch.fft.ifft(x_freq_high, dim=1).real
             
-            # x_low, x_high = self.filter[i](x)
-            
             seasonal_output = self.encoder_Seasonal[i](x_high)
             trend_output = self.encoder_Trend[i](x_low)
+            autocorr_output = self.autocorr[i](x)
 
+            output = seasonal_output + trend_output
+            output = torch.multiply(output,autocorr_output)
 
-            output = seasonal_output + trend_output     
             output_list.append(output)
-            
 
         output = torch.cat(output_list, dim=1)
         output = self.projection(output.permute(0,2,1)).permute(0,2,1)
-        # print("self.stepness: ", self.stepness, self.cutoff_frequencies)
 
-
-        # print("output:", output.shape )
         output = self.normalize_layer(output, 'denorm')
-     
-        # print("output Final: ", output.shape)
         return output
