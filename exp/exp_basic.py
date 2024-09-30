@@ -1,13 +1,13 @@
 import os
 import torch
-from models import  Mibrahim
+from models import  LMSAutoTSF
 
 
 class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
         self.model_dict = {
-            'Mibrahim': Mibrahim
+            'LMSAutoTSF': LMSAutoTSF
         }
         if args.model == 'Mamba':
             print('Please make sure you have successfully installed mamba_ssm')

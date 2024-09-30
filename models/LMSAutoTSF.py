@@ -13,22 +13,6 @@ def compute_lagged_difference(x, lag=1):
     diff_x[:, :lag, :] = x[:, :lag, :]
     return diff_x
 
-class Autocorrelation(nn.Module):
-    def __init__(self, feature_dim, seq_len, pred_len, max_lag=10):
-        super(Autocorrelation, self).__init__()
-        self.max_lag = max_lag
-        self.feature_dim = feature_dim
-        self.seq_len = seq_len
-        self.pred_len = pred_len
-
-        self.forecasting_layer = nn.Linear(self.seq_len, self.pred_len)        
-
-    def forward(self, x):
-        autocorr_features = compute_lagged_difference(x)
-        autocorr_forecast = self.forecasting_layer(autocorr_features.permute(0, 2, 1))  # (B, F, pred_len)
-
-        return autocorr_forecast.permute(0,2,1)
-
 
 class Encoder(nn.Module):
     def __init__(self, configs, seq_len, pred_len):
@@ -55,16 +39,16 @@ class Encoder(nn.Module):
                 nn.Dropout(configs.dropout)
             )
 
-
     def forward(self, x_enc):
 
         # Temporal and channel processing
         x_temp = self.temporal(x_enc.permute(0, 2, 1)).permute(0, 2, 1)
+        x_temp = torch.multiply(x_temp, compute_lagged_difference(x_enc))
         x = x_enc + x_temp
 
         if not self.channel_independence:
             x = x + self.channel(x_temp)
-
+        
         return self.linear_final(x.permute(0, 2, 1)).permute(0, 2, 1)
 
 
@@ -97,7 +81,6 @@ class Model(nn.Module):
 
         self.encoder_Seasonal = torch.nn.ModuleList([Encoder(configs, self.seq_len//i, self.pred_len) for i in sequence_list])
         self.encoder_Trend = torch.nn.ModuleList([Encoder(configs, self.seq_len//i, self.pred_len) for i in sequence_list])
-        self.autocorr = torch.nn.ModuleList([Autocorrelation(self.feature_dim, self.seq_len//i, self.pred_len) for i in sequence_list])
 
         self.normalize_layer = Normalize(configs.enc_in, affine=True, non_norm=True if configs.use_norm == 0 else False)
         self.projection = nn.Linear(self.pred_len * num_scales, self.pred_len)   
@@ -168,13 +151,11 @@ class Model(nn.Module):
             
             seasonal_output = self.encoder_Seasonal[i](x_high)
             trend_output = self.encoder_Trend[i](x_low)
-            autocorr_output = self.autocorr[i](x)
-
             output = seasonal_output + trend_output
-            output = torch.multiply(output,autocorr_output)
 
             output_list.append(output)
 
+        
         output = torch.cat(output_list, dim=1)
         output = self.projection(output.permute(0,2,1)).permute(0,2,1)
 
