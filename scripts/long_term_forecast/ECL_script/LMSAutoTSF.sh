@@ -1,11 +1,11 @@
-model_name=Mibrahim
+model_name=LMSAutoTSF
 
 python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/traffic/ \
-  --data_path traffic.csv \
-  --model_id traffic_96_96 \
+  --root_path ./dataset/electricity/ \
+  --data_path electricity.csv \
+  --model_id ECL_96_96 \
   --model $model_name \
   --channel_independence 0 \
   --data custom \
@@ -16,19 +16,18 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 862 \
-  --dec_in 862 \
-  --c_out 862 \
+  --enc_in 321 \
+  --dec_in 321 \
+  --c_out 321 \
   --des 'Exp' \
-  --itr 1 \
-  --train_epochs 10
+  --itr 1
 
 python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/traffic/ \
-  --data_path traffic.csv \
-  --model_id traffic_96_192 \
+  --root_path ./dataset/electricity/ \
+  --data_path electricity.csv \
+  --model_id ECL_96_192 \
   --model $model_name \
   --channel_independence 0 \
   --data custom \
@@ -39,19 +38,18 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 862 \
-  --dec_in 862 \
-  --c_out 862 \
+  --enc_in 321 \
+  --dec_in 321 \
+  --c_out 321 \
   --des 'Exp' \
-  --itr 1 \
-  --train_epochs 10
+  --itr 1
 
 python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/traffic/ \
-  --data_path traffic.csv \
-  --model_id traffic_96_336 \
+  --root_path ./dataset/electricity/ \
+  --data_path electricity.csv \
+  --model_id ECL_96_336 \
   --model $model_name \
   --channel_independence 0 \
   --data custom \
@@ -62,19 +60,18 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 862 \
-  --dec_in 862 \
-  --c_out 862 \
+  --enc_in 321 \
+  --dec_in 321 \
+  --c_out 321 \
   --des 'Exp' \
-  --itr 1 \
-  --train_epochs 10
+  --itr 1
 
 python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/traffic/ \
-  --data_path traffic.csv \
-  --model_id traffic_96_720 \
+  --root_path ./dataset/electricity/ \
+  --data_path electricity.csv \
+  --model_id ECL_96_720 \
   --model $model_name \
   --channel_independence 0 \
   --data custom \
@@ -85,9 +82,8 @@ python -u run.py \
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 862 \
-  --dec_in 862 \
-  --c_out 862 \
+  --enc_in 321 \
+  --dec_in 321 \
+  --c_out 321 \
   --des 'Exp' \
-  --itr 1 \
-  --train_epochs 10
+  --itr 1

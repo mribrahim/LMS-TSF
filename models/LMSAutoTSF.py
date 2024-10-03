@@ -61,7 +61,6 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.pred_len = configs.pred_len
         self.feature_dim = configs.enc_in
-        self.output_feature_dim = configs.dec_in
         self.d_model = configs.d_model
         self.down_sampling_layers = 3
         self.down_sampling_window = 2
