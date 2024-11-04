@@ -30,7 +30,6 @@ python -u run.py \
  --c_out 358 \
  --des 'Exp' \
  --itr 1 \
- --use_norm 0 \
   --channel_independence 0 \
  --d_model $d_model \
  --batch_size 32 \
@@ -59,7 +58,6 @@ python -u run.py \
  --c_out 307 \
  --des 'Exp' \
  --itr 1 \
- --use_norm 0 \
  --channel_independence 0 \
  --d_model $d_model \
  --batch_size 32 \
@@ -88,7 +86,6 @@ python -u run.py \
  --c_out 883 \
  --des 'Exp' \
  --itr 1 \
- --use_norm 0 \
  --channel_independence 0 \
  --d_model $d_model \
  --batch_size 32 \
@@ -117,7 +114,6 @@ python -u run.py \
   --c_out 170 \
   --des 'Exp' \
   --itr 1 \
-  --use_norm 0 \
   --channel_independence 0 \
   --d_model $d_model \
   --batch_size 32 \
