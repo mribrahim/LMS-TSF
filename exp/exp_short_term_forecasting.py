@@ -16,6 +16,23 @@ import pandas
 warnings.filterwarnings('ignore')
 
 
+def convert_to_tensor(y):
+    # Handle different possible input types
+    if isinstance(y, np.ndarray):
+        if y.dtype == object:
+            # Convert object array to list of float32
+            return torch.tensor([np.array(item, dtype=np.float32) for item in y])
+        else:
+            # Standard conversion for numeric arrays
+            return torch.from_numpy(y.astype(np.float32))
+    elif isinstance(y, list):
+        # Convert list to tensor, ensuring float32
+        return torch.tensor(y, dtype=torch.float32)
+    else:
+        # Fallback conversion
+        return torch.tensor(y, dtype=torch.float32)
+    
+
 class Exp_Short_Term_Forecast(Exp_Basic):
     def __init__(self, args):
         super(Exp_Short_Term_Forecast, self).__init__(args)
@@ -149,7 +166,9 @@ class Exp_Short_Term_Forecast(Exp_Basic):
             f_dim = -1 if self.args.features == 'MS' else 0
             outputs = outputs[:, -self.args.pred_len:, f_dim:]
             pred = outputs
-            true = torch.from_numpy(np.array(y))
+            # true = torch.from_numpy(np.array(y))
+            true = convert_to_tensor(y)
+
             batch_y_mark = torch.ones(true.shape)
 
             loss = criterion(x.detach().cpu()[:, :, 0], self.args.frequency_map, pred[:, :, 0], true, batch_y_mark)
