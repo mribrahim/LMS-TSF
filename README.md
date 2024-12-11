@@ -1,6 +1,7 @@
 # LEARNABLE MULTI-SCALE DECOMPOSITION AND INTEGRATED AUTOCORRELATION FOR TIME SERIES FORECASTING
 
-[LMS-AUTOTSF]([https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.TIME.2024.17](https://arxiv.org/pdf/2412.06866))
+[LMS-AUTOTSF](https://arxiv.org/pdf/2412.06866)
+
 
 ```
 @article{ibrahim2024LMSTSF,
@@ -10,3 +11,11 @@
   year={2024}
 }
 ```
+
+# Results
+
+Performanced comparison on public benchmark datasets
+
+![](images/Table-2.png)
+
+![](images/Table-3and4.png)
