@@ -16,6 +16,6 @@
 
 Performanced comparison on public benchmark datasets
 
-![](images/Table-2.png)
+![](images/Table2.png)
 
 ![](images/Table-3and4.png)
