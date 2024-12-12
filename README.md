@@ -19,3 +19,9 @@ Performanced comparison on public benchmark datasets
 ![](images/Table2.png)
 
 ![](images/Table-3and4.png)
+
+
+# Acknowledgement
+We appreciate the following GitHub repositories:
+
+https://github.com/thuml/Time-Series-Library
