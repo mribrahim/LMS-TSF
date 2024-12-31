@@ -4,9 +4,9 @@
 
 
 ```
-@article{ibrahim2024LMSTSF,
+@article{Delibasoglu2024lms,
   title={LMS-AutoTSF: Learnable Multi-Scale Decomposition and Integrated Autocorrelation for Time Series Forecasting},
-  author=Ibrahim Delibasoglu Sanjay Chakraborty Fredrik Heintz},
+  author={Ibrahim Delibasoglu and Sanjay Chakraborty and Fredrik Heintz},
   journal={arXiv preprint arXiv:2412.06866},
   year={2024}
 }
