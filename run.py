@@ -3,6 +3,7 @@ import os
 import torch
 from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
 from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
+from exp.exp_anomaly_detection import Exp_Anomaly_Detection
 from utils.print_args import print_args
 import random
 import numpy as np
@@ -148,6 +149,8 @@ if __name__ == '__main__':
         Exp = Exp_Long_Term_Forecast
     elif args.task_name == 'short_term_forecast':
         Exp = Exp_Short_Term_Forecast
+    elif args.task_name == 'anomaly_detection':
+        Exp = Exp_Anomaly_Detection
     else:
         Exp = Exp_Long_Term_Forecast
 

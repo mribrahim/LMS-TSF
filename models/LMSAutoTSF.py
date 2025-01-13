@@ -65,6 +65,9 @@ class Model(nn.Module):
         self.down_sampling_layers = 3
         self.down_sampling_window = 2
 
+        if self.task_name == 'anomaly_detection':
+            self.pred_len = self.seq_len
+
         sequence_list = [1]
         current = 2
         for _ in range(1, self.down_sampling_layers+1):
@@ -130,7 +133,7 @@ class Model(nn.Module):
         return x_freq_filtered
     
     
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
+    def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
                 
         x_enc = self.normalize_layer(x_enc, 'norm')
 
@@ -160,3 +163,43 @@ class Model(nn.Module):
 
         output = self.normalize_layer(output, 'denorm')
         return output
+    
+
+    def anomaly_detection(self, x_enc):
+                
+        x_enc = self.normalize_layer(x_enc, 'norm')
+
+        output_list = []
+        # ******************* SCALED INPUTS *******************************
+        x_enc_list, x_mark_enc_list = self.__multi_scale_process_inputs(x_enc, x_mark_enc=None)
+        for i, x in zip(range(len(x_enc_list)), x_enc_list):
+            seq_len = x.shape[1]
+            # Frequency domain processing
+            x_freq = torch.fft.fft(x, dim=1)
+
+            x_freq_low = self.low_pass_filter(x_freq, seq_len, self.cutoff_frequencies[i], self.stepness[i])
+            x_freq_high = self.high_pass_filter(x_freq, seq_len, self.cutoff_frequencies[i], self.stepness[i])
+        
+            x_low = torch.fft.ifft(x_freq_low, dim=1).real
+            x_high = torch.fft.ifft(x_freq_high, dim=1).real
+            
+            seasonal_output = self.encoder_Seasonal[i](x_high)
+            trend_output = self.encoder_Trend[i](x_low)
+            output = seasonal_output + trend_output
+
+            output_list.append(output)
+
+        
+        output = torch.cat(output_list, dim=1)
+        output = self.projection(output.permute(0,2,1)).permute(0,2,1)
+
+        output = self.normalize_layer(output, 'denorm')
+        return output
+    
+    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
+        if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
+            dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+            return dec_out[:, -self.pred_len:, :]  # [B, L, D]
+        if self.task_name == 'anomaly_detection':
+            dec_out = self.anomaly_detection(x_enc)
+            return dec_out  # [B, L, D]
