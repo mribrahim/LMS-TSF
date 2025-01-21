@@ -1,0 +1,9 @@
+bash ./scripts/long_term_forecast/ETT_script/ETTh1.sh
+bash ./scripts/long_term_forecast/ETT_script/ETTh2.sh
+bash ./scripts/long_term_forecast/ETT_script/ETTm1.sh
+bash ./scripts/long_term_forecast/ETT_script/ETTm2.sh
+bash ./scripts/long_term_forecast/weather.sh
+bash ./scripts/long_term_forecast/electricity.sh
+bash ./scripts/long_term_forecast/traffic.sh
+bash ./scripts/long_term_forecast/exchange.sh
+bash ./scripts/long_term_forecast/solar.sh
