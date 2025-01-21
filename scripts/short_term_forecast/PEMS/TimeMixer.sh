@@ -1,16 +1,16 @@
 #export CUDA_VISIBLE_DEVICES=0
 
-model_name=CrossScaleNet
+model_name=TimeMixer
 
 seq_len=96
-pred_len=48
-
-down_sampling_layers=3
+pred_len=12
+down_sampling_layers=1
 down_sampling_window=2
 learning_rate=0.003
 d_model=128
+d_ff=256
 batch_size=32
-train_epochs=20
+train_epochs=10
 patience=3
 
 python -u run.py \
@@ -25,6 +25,9 @@ python -u run.py \
  --seq_len $seq_len \
  --label_len 0 \
  --pred_len $pred_len \
+ --e_layers 5 \
+ --d_layers 1 \
+ --factor 3 \
  --enc_in 358 \
  --dec_in 358 \
  --c_out 358 \
@@ -32,6 +35,7 @@ python -u run.py \
  --itr 1 \
   --channel_independence 0 \
  --d_model $d_model \
+ --d_ff $d_ff \
  --batch_size 32 \
  --learning_rate $learning_rate \
  --train_epochs $train_epochs \
@@ -53,6 +57,9 @@ python -u run.py \
  --seq_len $seq_len \
  --label_len 0 \
  --pred_len $pred_len \
+ --e_layers 5 \
+ --d_layers 1 \
+ --factor 3 \
  --enc_in 307 \
  --dec_in 307 \
  --c_out 307 \
@@ -60,6 +67,7 @@ python -u run.py \
  --itr 1 \
  --channel_independence 0 \
  --d_model $d_model \
+ --d_ff $d_ff \
  --batch_size 32 \
  --learning_rate $learning_rate \
  --train_epochs $train_epochs \
@@ -81,6 +89,9 @@ python -u run.py \
  --seq_len $seq_len \
  --label_len 0 \
  --pred_len $pred_len \
+ --e_layers 5 \
+ --d_layers 1 \
+ --factor 3 \
  --enc_in 883 \
  --dec_in 883 \
  --c_out 883 \
@@ -88,6 +99,7 @@ python -u run.py \
  --itr 1 \
  --channel_independence 0 \
  --d_model $d_model \
+ --d_ff $d_ff \
  --batch_size 32 \
  --learning_rate $learning_rate \
  --train_epochs $train_epochs \
@@ -109,6 +121,9 @@ python -u run.py \
   --seq_len $seq_len \
   --label_len 0 \
   --pred_len $pred_len \
+  --e_layers 5 \
+  --d_layers 1 \
+  --factor 3 \
   --enc_in 170 \
   --dec_in 170 \
   --c_out 170 \
@@ -116,6 +131,7 @@ python -u run.py \
   --itr 1 \
   --channel_independence 0 \
   --d_model $d_model \
+  --d_ff $d_ff \
   --batch_size 32 \
   --learning_rate $learning_rate \
   --train_epochs 10 \
