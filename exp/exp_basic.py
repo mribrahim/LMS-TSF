@@ -1,6 +1,6 @@
 import os
 import torch
-from models import  LMSAutoTSF, iTransformer, TimeMixer, PatchTST, CrossScaleNet
+from models import  LMSAutoTSF, iTransformer, TimeMixer, PatchTST
 
 
 class Exp_Basic(object):
@@ -11,7 +11,6 @@ class Exp_Basic(object):
             "iTransformer": iTransformer,
             "TimeMixer": TimeMixer,
             "PatchTST": PatchTST,
-            "CrossScaleNet": CrossScaleNet
         }
         if args.model == 'Mamba':
             print('Please make sure you have successfully installed mamba_ssm')
