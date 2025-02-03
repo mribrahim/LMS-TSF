@@ -112,3 +112,65 @@ def adjustment(gt, pred):
         if anomaly_state:
             pred[i] = 1
     return gt, pred
+
+
+
+
+def coverage_based_adjustment(y_true: np.ndarray, y_pred: np.ndarray, coverage: float = 0.05, erase_tp: bool = False) -> np.ndarray:
+    """
+    Optimized coverage-based adjustment for anomaly predictions.
+
+    Parameters:
+    y_true (np.ndarray): Ground truth labels (1 for anomaly, 0 for normal).
+    y_pred (np.ndarray): Predicted labels (1 for anomaly, 0 for normal).
+    coverage (float): Minimum coverage ratio to consider a segment as an anomaly.
+    erase_tp (bool): Whether to erase true positives outside the coverage-adjusted segments.
+
+    Returns:
+    np.ndarray: Adjusted predicted labels.
+    """
+    y_adj = y_pred.copy()
+    
+    # Identify start and end indices of ground truth anomaly segments
+    anomaly_boundaries = np.where(np.diff(np.pad(y_true, (1, 1), constant_values=0)) != 0)[0]
+    segment_starts = anomaly_boundaries[::2]
+    segment_ends = anomaly_boundaries[1::2]
+
+    # Process each anomaly segment
+    for start, end in zip(segment_starts, segment_ends):
+        # Determine the width of the anomaly segment
+        anomaly_width = end - start
+        
+        # Count predicted anomalies in this segment
+        pred_count = np.sum(y_pred[start:end])
+        
+        # Calculate coverage ratio
+        coverage_ratio = pred_count / anomaly_width
+        
+        if coverage_ratio >= coverage:
+            # Mark entire segment as a predicted anomaly
+            y_adj[start:end] = 1
+        elif erase_tp:
+            # Erase predictions outside valid coverage
+            y_adj[start:end] = 0
+
+    return y_true, y_adj
+
+import pandas as pd
+def sliding_window_anomaly_detection(mse_list, window_size, threshold_factor=3):
+    mse_series = pd.Series(mse_list)
+    
+    # Calculate moving average and moving standard deviation
+    moving_avg = mse_series.rolling(window=window_size, min_periods=1).mean()
+    moving_std = mse_series.rolling(window=window_size, min_periods=1).std()
+    
+    # Calculate dynamic threshold
+    dynamic_threshold = moving_avg + (threshold_factor * moving_std)
+    
+    # Identify anomalies
+    anomalies = (mse_series > dynamic_threshold).astype(int)
+
+    # Convert to list for output
+    anomalies_list = anomalies.tolist()
+    
+    return anomalies_list, dynamic_threshold.tolist()

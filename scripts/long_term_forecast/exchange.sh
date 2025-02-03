@@ -10,7 +10,7 @@ for pred_len in "${pred_lengths[@]}"; do
     --is_training 1 \
     --root_path ./dataset/exchange_rate/ \
     --data_path exchange_rate.csv \
-    --model_id Exchange_$seq_len_$pred_len \
+    --model_id Exchange_$seq_len \
     --model $model_name \
     --channel_independence 1 \
     --d_model $d_model \

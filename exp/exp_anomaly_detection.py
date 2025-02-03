@@ -1,6 +1,6 @@
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
-from utils.tools import EarlyStopping, adjust_learning_rate, adjustment
+from utils.tools import EarlyStopping, adjust_learning_rate, adjustment, coverage_based_adjustment, sliding_window_anomaly_detection
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import accuracy_score
 import torch.multiprocessing
@@ -175,6 +175,13 @@ class Exp_Anomaly_Detection(Exp_Basic):
 
         # (3) evaluation on the test set
         pred = (test_energy > threshold).astype(int)
+
+        # th_factor = 2.0
+        # attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
+        # test_energy = np.array(attens_energy)
+        # pred, dynamic_threshold = sliding_window_anomaly_detection(test_energy, window_size=self.args.seq_len, threshold_factor=th_factor)
+        # pred = np.array(pred)
+
         test_labels = np.concatenate(test_labels, axis=0).reshape(-1)
         test_labels = np.array(test_labels)
         gt = test_labels.astype(int)
@@ -183,7 +190,9 @@ class Exp_Anomaly_Detection(Exp_Basic):
         print("gt:     ", gt.shape)
 
         # (4) detection adjustment
-        gt, pred = adjustment(gt, pred)
+        # gt, pred = adjustment(gt, pred)
+        gt, pred = coverage_based_adjustment(gt, pred)
+
 
         pred = np.array(pred)
         gt = np.array(gt)

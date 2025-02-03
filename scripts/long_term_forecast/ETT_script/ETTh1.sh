@@ -11,7 +11,7 @@ for pred_len in "${pred_lengths[@]}"; do
     --is_training 1 \
     --root_path ./dataset/ETT-small/ \
     --data_path ETTh1.csv \
-    --model_id ETTh1_$seq_len_$pred_len \
+    --model_id ETTh1_$seq_len \
     --model $model_name \
      --d_model $d_model \
     --channel_independence 0 \

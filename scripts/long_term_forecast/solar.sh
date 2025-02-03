@@ -2,11 +2,6 @@
 
 . ./scripts/long_term_forecast/define_params.sh
 
-d_model=64
-
-model_name=TFT
-pred_lengths=(336 720)
-
 # Loop through each prediction length
 for pred_len in "${pred_lengths[@]}"; do
     python -u run.py \
@@ -14,7 +9,7 @@ for pred_len in "${pred_lengths[@]}"; do
     --is_training 1 \
     --root_path ./dataset/Solar/ \
     --data_path solar_AL.txt \
-    --model_id Solar_$seq_len_$pred_len \
+    --model_id Solar_$seq_len \
     --model $model_name \
     --channel_independence 0 \
     --d_model $d_model \

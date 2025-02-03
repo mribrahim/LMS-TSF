@@ -892,3 +892,90 @@ class Dataset_PEMS(Dataset):
 
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
+    
+
+
+class Dataset_PM25(Dataset):
+    def __init__(self, args, root_path, flag='train', size=None, features='S',
+                 data_path='Beijing PM2.5.csv', target=None,
+                 scale=True, timeenc=0, freq='h', seasonal_patterns=None):
+        # size [seq_len, label_len, pred_len]
+        # info
+        self.seq_len = size[0]
+        self.label_len = size[1]
+        self.pred_len = size[2]
+        # init
+        self.target = "pm2.5"
+        assert flag in ['train', 'test', 'val']
+        type_map = {'train': 0, 'val': 1, 'test': 2}
+        self.set_type = type_map[flag]
+
+        self.features = features
+        self.scale = scale
+        self.timeenc = timeenc
+        self.freq = freq
+
+        self.root_path = root_path
+        self.data_path = data_path
+        self.__read_data__()
+
+    def __read_data__(self):
+        self.scaler = StandardScaler()
+        df_raw = pd.read_csv(os.path.join(self.root_path,
+                                          self.data_path))
+
+        df_raw = df_raw.iloc[:,5:] # remove first N (date info)
+        # drop rows that contain NaN values
+        df_raw = df_raw.dropna()
+        df_raw = df_raw.join(pd.get_dummies(df_raw['cbwd'])) # one-hot encoding
+        del df_raw['cbwd']
+
+        # Put target column to the end, because of visual() is test_results
+        first_col = df_raw.pop(df_raw.columns[0])  
+        # print("move column target {0} to the end".format(first_col.name))
+        df_raw[first_col.name] = first_col 
+        print("Column names: ", df_raw.columns)
+        
+        num_train = int(len(df_raw) * 0.6)
+        num_test = int(len(df_raw) * 0.3)
+        num_valid = int(len(df_raw) * 0.1)
+        border1s = [0, num_train - self.seq_len, len(df_raw) - num_test - self.seq_len]
+        border2s = [num_train, num_train + num_valid, len(df_raw)]
+        border1 = border1s[self.set_type]
+        border2 = border2s[self.set_type]
+
+        df_data = df_raw.values
+        # print("data Y: ", df_data[:10, -1])
+        
+        if self.scale:
+            train_data = df_data[border1s[0]:border2s[0]]
+            self.scaler.fit(train_data)
+            data = self.scaler.transform(df_data)
+        else:
+            data = df_data
+
+
+        self.data_x = data[border1:border2]
+        self.data_y = data[border1:border2, -1].reshape(-1,1)
+        # print("data: {0} type: {1}  X: {2}  Y: {3}".format(self.data_path, self.set_type, self.data_x.shape, self.data_y.shape))
+    
+
+
+    def __getitem__(self, index):
+        s_begin = index
+        s_end = s_begin + self.seq_len
+        r_begin = s_end - self.label_len
+        r_end = r_begin + self.label_len + self.pred_len
+
+        seq_x = self.data_x[s_begin:s_end]
+        seq_y = self.data_y[r_begin:r_end]
+        seq_x_mark = torch.zeros((seq_x.shape[0], 1))
+        seq_y_mark = torch.zeros((seq_x.shape[0], 1))
+
+        return seq_x, seq_y, seq_x_mark, seq_y_mark
+
+    def __len__(self):
+        return len(self.data_x) - self.seq_len - self.pred_len + 1
+
+    def inverse_transform(self, data):
+        return self.scaler.inverse_transform(data)

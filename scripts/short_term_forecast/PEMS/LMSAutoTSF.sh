@@ -1,6 +1,7 @@
 #export CUDA_VISIBLE_DEVICES=0
 
-model_name=CrossScaleNet
+# model_name=LMSAutoTSF
+model_name=LMSAutoTSFV2
 
 seq_len=96
 pred_len=48

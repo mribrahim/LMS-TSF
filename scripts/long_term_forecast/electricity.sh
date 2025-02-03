@@ -10,7 +10,7 @@ for pred_len in "${pred_lengths[@]}"; do
     --is_training 1 \
     --root_path ./dataset/electricity/ \
     --data_path electricity.csv \
-    --model_id ECL_$seq_len_$pred_len \
+    --model_id ECL_$seq_len \
     --model $model_name \
     --channel_independence 0 \
     --d_model $d_model \

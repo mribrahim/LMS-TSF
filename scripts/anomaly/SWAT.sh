@@ -4,11 +4,12 @@ batch_size=128
 down_sampling_layers=3
 down_sampling_window=2
 
-for method in CrossScaleNet #LMSAutoTSF iTransformer TimeMixer PatchTST
+# for method in CrossScaleNet LMSAutoTSF iTransformer TimeMixer PatchTST
+for method in LMSAutoTSF
 do
   python -u run.py \
     --task_name anomaly_detection \
-    --is_training 1 \
+    --is_training 0 \
     --root_path ./dataset/SWAT \
     --model_id SWAT \
     --model $method \
