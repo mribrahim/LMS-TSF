@@ -1,12 +1,11 @@
-# LEARNABLE MULTI-SCALE DECOMPOSITION AND INTEGRATED AUTOCORRELATION FOR TIME SERIES FORECASTING
+# Learnable Multi-Scale Decomposition and Integrated Autocorrelation for Time Series Forecasting
 
 [LMS-AUTOTSF](https://arxiv.org/pdf/2412.06866)
 
-
 ```
-@article{Delibasoglu2024lms,
+article{delibasoglu2024lms,
   title={LMS-AutoTSF: Learnable Multi-Scale Decomposition and Integrated Autocorrelation for Time Series Forecasting},
-  author={Ibrahim Delibasoglu and Sanjay Chakraborty and Fredrik Heintz},
+  author={Delibasoglu, Ibrahim and Chakraborty, Sanjay and Heintz, Fredrik},
   journal={arXiv preprint arXiv:2412.06866},
   year={2024}
 }
