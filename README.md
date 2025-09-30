@@ -11,6 +11,11 @@ article{delibasoglu2024lms,
 }
 ```
 
+# Learning Temporal Saliency for Time Series Forecasting with Cross-Scale Attention
+
+[CrossScaleNet](https://arxiv.org/abs/2509.22839)
+
+
 # Results
 
 Performanced comparison on public benchmark datasets
