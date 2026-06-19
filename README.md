@@ -1,6 +1,10 @@
 # Learnable Multi-Scale Decomposition and Integrated Autocorrelation for Time Series Forecasting
 
-[LMS-AUTOTSF](https://arxiv.org/pdf/2412.06866)
+ We improved the preprint study by adding confidence-aware forecasting option. Cite both of the paper if you use [LMSAutoTSF](models/LMSAutoTSF.py) or [LMSAutoTSFV2](models/LMSAutoTSV2F.py).
+
+[EAAI paper](https://www.sciencedirect.com/science/article/pii/S0952197626017331)
+
+[Arxiv paper](https://arxiv.org/pdf/2412.06866)
 
 ```
 article{delibasoglu2024lms,
